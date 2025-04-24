@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drowsiness & Yawn Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f2027;  /* cool gradient dark theme */
+            background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            color: white;
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #video {
+            border: 6px solid #fff;
+            border-radius: 20px;
+            margin: 20px auto;
+        }
+
+        #alert {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .drowsy {
+            background-color: red;
+        }
+
+        .yawn {
+            background-color: orange;
+        }
+
+        .normal {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drowsiness & Yawn Detection</h1>
+    
+    <img src="{{ url_for('video_feed') }}" id="video" width="640" height="480" />
+
+    <div id="alert" class="normal">Status: Normal</div>
+
+    <audio id="drowsy-audio" src="{{ url_for('static', filename='/Users/priyanka/Desktop/drowsiness_webapp/static/warning-alarm-loop-1-279206.wav') }}"></audio>
+    <audio id="yawn-audio" src="{{ url_for('static', filename='/Users/priyanka/Desktop/drowsiness_webapp/static/emergency-alarm-69780.wav') }}"></audio>
+
+    <script>
+        function pollState() {
+            fetch('/get_state', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const alertDiv = document.getElementById('alert');
+                    const drowsyAudio = document.getElementById('drowsy-audio');
+                    const yawnAudio = document.getElementById('yawn-audio');
+
+                    if (data.state === 'Drowsy') {
+                        alertDiv.textContent = "Status: Drowsy!";
+                        alertDiv.className = 'drowsy';
+                        drowsyAudio.play();
+                    } else if (data.state === 'Yawning') {
+                        alertDiv.textContent = "Status: Yawning!";
+                        alertDiv.className = 'yawn';
+                        yawnAudio.play();
+                    } else {
+                        alertDiv.textContent = "Status: Normal";
+                        alertDiv.className = 'normal';
+                    }
+                });
+        }
+
+        setInterval(pollState, 2000); // Poll every 2 seconds
+    </script>
+</body>
+</html>
